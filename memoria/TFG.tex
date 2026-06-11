@@ -438,9 +438,10 @@ These limits also say what the ink \emph{is} for. As a ppm meter it
 needs slow environments and an occasional anchor; as an \emph{indicator},
 neither: with no correction at all, the IR-referenced readout reaches
 AUC 0.98 at 800 ppm and 0.99 at 1000 ppm (accuracies 92\,\% and 96\,\%
-against majority-class baselines of 79\,\% and 88\,\%). That is the regime of modified-atmosphere food packaging: a printed
-label, read by a phone camera, that asks only whether the level is above
-a threshold.
+against majority-class baselines of 79\,\% and 88\,\%). That is the
+indoor-ventilation use the host group's monitoring platform targets
+\cite{gonzalez25,benito25}: a low-cost element asking only whether the
+level is above a threshold.
 
 \subsection{Adding the validation block to training}
 
@@ -479,7 +480,7 @@ modulation. Fluctuations faster than this are physically unrecoverable, a
 floor on test error distinct from model failure (Appendix); this sets the
 application envelope (slowly varying air); next: drift-stable references,
 an orthogonal RH$\times$CO$_2$ sweep, a multi-film repeat. In threshold mode the absolute-anchor requirement disappears
-(AUC 0.98 at 800 ppm with no correction): the smart-packaging regime.
+(AUC 0.98 at 800 ppm with no correction): the ventilation-indicator regime.
 
 \item Methodologically, validating every channel against independent
 references proved decisive: it exposed a channel-labelling inconsistency
