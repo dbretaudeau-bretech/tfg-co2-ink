@@ -73,7 +73,9 @@ occupied rooms drift from the $\sim$420-ppm background to beyond
 power-hungry. An attractive low-cost alternative is a \emph{colorimetric}
 sensor: a dye-based ink whose colour depends on the surrounding CO$_2$
 concentration, read out by nothing more than a light source and a
-photodetector \cite{mills92}.
+photodetector \cite{mills92}. The film studied here is a prototype from
+a water-based, CO$_2$-selective ink family recently developed by the
+host group \cite{gonzalez25}.
 
 The transduction chain is acid--base chemistry. CO$_2$ dissolves into the
 water held by the film and hydrates to carbonic acid, which dissociates and
@@ -107,7 +109,7 @@ smooth, monotonic and close to linear while that ratio remains small.
 Equation~(\ref{eq:chem}) also exposes the first intrinsic weakness: water
 activity enters the equilibrium directly, and the film's water content
 additionally sets its swelling and the indicator's effective p$K_a$, so
-humidity must interfere. The second weakness is kinetic rather than
+humidity must interfere \cite{gonzalez25}. The second weakness is kinetic rather than
 thermodynamic: reaching the equilibrium of Eq.~(\ref{eq:chem}) requires gas
 dissolution and diffusion through the film (the CO$_2$ hydration step
 itself adds only seconds), so the ink is \emph{slow}: effective time
@@ -137,15 +139,14 @@ factor of two.
 \subsection{Sensing element and chamber protocol}
 
 The ink is deposited as a film and read in reflectance by four identical
-OnePixel sensors (pixels 0--3), each reporting four channels, red (R),
+OnePixel sensors \cite{benito25} (pixels 0--3), each reporting four channels, red (R),
 green (G), blue (B) and infrared (IR), at 0.2 Hz under LED illumination
 whose duty cycle (``lamp'') is programmable. Both multiplicities are
 deliberate: separating hue from illumination needs several colour
-channels (one channel measures only their product; Sec.~IV demonstrates
-it empirically), and
+channels (Sec.~IV shows a single one fails), and
 four identical pixels give dropout redundancy, noise averaging, and a
 measure of film inhomogeneity that enters the feature set below. The film sits in a sealed chamber fed by three mass-flow-controlled gas
-lines (dry synthetic air, humidified air, CO$_2$), with two co-located
+lines (dry synthetic air, humidified air, CO$_2$) \cite{gonzalez25}, with two co-located
 references: a Sensirion SCD30 NDIR \cite{scd30} for CO$_2$ and a Bosch
 BME280 \cite{bme280} for RH and temperature.
 
@@ -180,9 +181,7 @@ reaches $\sim$75\,\% of nominal, $\sim$64\,\% when the humid line runs
 high): the nominal ignores part of the dilution. All results below are therefore calibrated
 against the \emph{measured} references (SCD30 for CO$_2$, BME280 for RH),
 and the true CO$_2$ range is the 100--1700 ppm of
-Fig.~\ref{fig:protocol}. The general lesson:
-calibration targets must be validated against independent measurements
-before any fitting.
+Fig.~\ref{fig:protocol}.
 
 \subsection{Learning task and splits}
 \label{sec:task}
@@ -387,9 +386,8 @@ stopping: $521\pm67$ ppm, $r=0.70$). Sequence models do best: an LSTM reading si
 context becomes the ladder's best shape-tracker ($r=0.81\pm0.03$ over five
 seeds, Fig.~\ref{fig:predictions}b), yet still posts MAE $\approx$650
 ppm: no context length we could test (up to 8 h) supplies the absolute
-anchor. The conclusion is consistent across families: none of them, linear to
-recurrent, infers the drift from the visible channels; added capacity only
-memorises it.
+anchor. No family, linear to recurrent, infers the drift from the
+visible channels; added capacity only memorises it.
 
 \subsection{CO$_2$ with an infrared reference}
 
@@ -405,7 +403,7 @@ narrower), so it is not exploiting training-period quirks. The reference
 cancels drift common to the channels but not lamp steps (IR barely follows
 the duty cycle), which is what the remaining error is made of. The fitted weights load mainly on the red-channel ratios with opposing
 signs across pixels, consistent with between-pixel common-mode rejection
-(coefficients of collinear features should not be read literally); tiny
+(collinear coefficients are not individually meaningful); tiny
 MLPs only lose, consistent with an essentially linear relation.
 
 \subsection{CO$_2$ with one offset per illumination change}
@@ -434,9 +432,7 @@ All results come from one film in one 77-h run. The single-ratio B/R noise after
 $\sim$$1.1\times10^{-4}$ ($\approx$22 ppm at the measured sensitivity),
 is an indicative resolution scale; in practice drift dominates the
 error budget. Chamber temperature (27.3--31.2 $^\circ$C) correlates
-weakly with the residuals ($r=0.26$), so it is not the dominant term,
-though its
-full influence is unconstrained here.
+weakly with the residuals ($r=0.26$), so it is not the dominant term.
 
 These limits also say what the ink \emph{is} for. As a ppm meter it
 needs slow environments and an occasional anchor; as an \emph{indicator},
@@ -478,10 +474,9 @@ illumination change (45 in a single refit on all pre-test data); all
 results are one-film, reference-anchored.
 
 \item A central limitation is the \emph{speed} of the CO$_2$ changes:
-training gives the film hours to adapt, the test protocol only minutes;
 the apparent lag grows from $\sim$3 to $\sim$44 min under fast
 modulation. Fluctuations faster than this are physically unrecoverable, a
-floor on test error distinct from model failure (lag correction is not the lever; Appendix); this sets the
+floor on test error distinct from model failure (Appendix); this sets the
 application envelope (slowly varying air); next: drift-stable references,
 an orthogonal RH$\times$CO$_2$ sweep, a multi-film repeat. In threshold mode the absolute-anchor requirement disappears
 (AUC 0.98 at 800 ppm with no correction): the smart-packaging regime.
@@ -496,23 +491,30 @@ I thank my advisor, Ismael Benito Altamirano, and Cristian F\`abrega
 with the EMERGE collaboration for ink, chamber and measurements.
 \end{acknowledgments}
 
-\vspace*{-4mm}
+\vspace*{-7mm}
 \begin{thebibliography}{99}
 
 \bibitem{satish} U. Satish {\it et al.}, ``Is CO$_2$ an indoor pollutant?
-Direct effects of low-to-moderate CO$_2$ concentrations on human
-decision-making performance'', Environ. Health Perspect. {\bf 120},
-1671--1677 (2012).
+Direct effects on human decision-making performance'', Environ. Health
+Perspect. {\bf 120}, 1671 (2012).
 
 \bibitem{mills92} A. Mills, Q. Chang and N. McMurray, ``Equilibrium studies
 on colorimetric plastic film sensors for carbon dioxide'', Anal. Chem.
-{\bf 64}, 1383--1389 (1992).
+{\bf 64}, 1383 (1992).
+
+\bibitem{gonzalez25} M. Gonz\'alez-G\'omez, I. Benito-Altamirano,
+J. D. Prades, O. Casals and C. F\`abrega, ``Ultralow-cost and selective
+water-based colorimetric ink for indoor CO$_2$ monitoring'', IEEE Sens.
+J. {\bf 25}, 18722--18730 (2025).
+
+\bibitem{benito25} I. Benito-Altamirano {\it et al.}, ``When colorimetry
+meets the cloud: IoT-enabled health monitoring at home via
+highly-specific gas sensing'', Proc. AINA-2025, Springer (2025).
 
 \bibitem{scd30} Sensirion AG, {\it SCD30 CO$_2$ sensor datasheet}
 (2020).
 
-\bibitem{bme280} Bosch Sensortec, {\it BME280 humidity and pressure
-sensor datasheet} (2022).
+\bibitem{bme280} Bosch Sensortec, {\it BME280 sensor datasheet} (2022).
 
 \bibitem{vergara} A. Vergara {\it et al.}, ``Chemical gas sensor
 drift compensation using classifier ensembles'', Sens. Actuators B
@@ -692,8 +694,8 @@ robustness to instantaneous models and a wrong temporal regime to
 recurrent ones.
 
 {\bf Reproducibility.} The full pipeline (feature construction, every
-model, figure and verification scripts) is public at
-\texttt{github.com/dbretaudeau-bretech/tfg-co2-ink}; total training time
+model, figure and verification scripts) is a documented set of Python
+scripts, available on request; total training time
 is under five minutes on CPU for all linear models plus
 $\sim$10 min on one GPU for the LSTM variants.
 
