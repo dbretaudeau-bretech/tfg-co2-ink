@@ -1,0 +1,700 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TFG — Daniel Bretaudeau — June 2026
+% Built on the official UB Física template (Plantilla pel Treball Fi de Grau)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[twocolumn]{revtex4}
+\usepackage{graphicx,epsfig}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{fancyhdr}
+
+\newcommand{\keyword}[1]{\noindent{\bf Keywords: }{#1}\\}
+\newcommand{\keywordcat}[1]{\noindent{\bf Paraules clau: }{#1}\\}
+\newcommand{\sdg}[1]{\noindent{\bf SDGs: }{#1}\\}
+\newcommand{\ods}[1]{\noindent{\bf ODSs: }{#1}\\}
+
+% Kill parskip stretch + give columns a bottom sink (avoids huge gaps when
+% a column is text-starved by floats)
+\makeatletter
+\setlength{\parskip}{0pt}
+\def\@textbottom{\vskip\z@\@plus 1fil}
+\makeatother
+
+% Redefine \maketitle so that it can be used twice (for supplementary)
+\makeatletter
+\def\maketitle{
+\@author@finish
+\title@column\titleblock@produce
+\suppressfloats[t]}
+\makeatother
+
+\begin{document}
+
+\pagestyle{fancy}
+\lhead{\bf Machine-learning readout of a colorimetric CO$_2$-sensing ink}
+\rhead{Daniel Bretaudeau Merce}
+\lfoot{Treball de Fi de Grau}
+\rfoot{Barcelona, June 2026}
+
+\title{Machine-learning readout of a colorimetric CO$_2$-sensing ink}
+\author{Author: Daniel Bretaudeau Merce, [email]@alumnes.ub.edu}  % TODO email
+\affiliation{Facultat de F\'{\i}sica, Universitat de Barcelona, Diagonal
+645, 08028 Barcelona, Spain.}
+\author{Advisor: Ismael Benito Altamirano, ismael.benito@ub.edu}
+
+\begin{abstract}
+{\bf Abstract:} A low-cost route to CO$_2$ monitoring is a colorimetric ink
+whose colour tracks CO$_2$, read by miniature reflectance sensors. We characterise one ink over a 77-hour gas-chamber protocol sweeping
+CO$_2$ ($\sim$100--1700 ppm), relative humidity (RH) and illumination, recording four red--green--blue--infrared pixels and NDIR
+and RH references. After validating every channel against these references,
+we show the blue-to-red ratio B/R responds linearly to CO$_2$
+(sensitivity $\approx-5\times10^{-6}$ per ppm), with order-$10^3$ ppm
+per \%RH humidity cross-sensitivity (loosely constrained) and a lag up to
+tens of minutes. Humidity is recovered from the
+ink alone (MAE 0.35\,\%, $R^2=0.993$). For absolute CO$_2$, referencing each colour channel to the
+co-measured infrared cancels most channel-common drift: a 12-feature
+linear model reaches MAE 103 ppm ($R^2=0.77$) uncorrected and, with one
+offset per illumination change, 50 ppm against a 54-ppm
+hold-the-calibration baseline ($R^2$ 0.71 vs 0.57) on the lamp-stable
+34\,\% of test.
+
+\keyword{colorimetric sensing, CO$_2$ sensor, optical reflectance, machine learning, regression, sensor drift}
+\sdg{3, 9, 11, 13 (see page 6)}
+\end{abstract}
+
+\maketitle
+\thispagestyle{fancy}
+
+\section{Introduction}
+
+Carbon dioxide is the standard proxy for indoor air quality and ventilation:
+occupied rooms drift from the $\sim$420-ppm background to beyond
+1500 ppm, levels with measurable cognitive effects \cite{satish}. The reference technology (NDIR) is accurate but bulky and
+power-hungry. An attractive low-cost alternative is a \emph{colorimetric}
+sensor: a dye-based ink whose colour depends on the surrounding CO$_2$
+concentration, read out by nothing more than a light source and a
+photodetector \cite{mills92}.
+
+The transduction chain is acid--base chemistry. CO$_2$ dissolves into the
+water held by the film and hydrates to carbonic acid, which dissociates and
+lowers the internal pH,
+\begin{equation}
+\mathrm{CO_2 + H_2O \rightleftharpoons H_2CO_3 \rightleftharpoons H^+ +
+HCO_3^-},
+\label{eq:chem}
+\end{equation}
+shifting the equilibrium of a pH-indicator dye between its basic and
+protonated forms. The two forms absorb in different
+spectral bands, so the \emph{hue} of the reflected light (the balance
+between blue and red) tracks the protonated fraction; the modulations are small ($\Delta$B/R $<1\,\%$ over the
+full range), so the reflectance--absorbance relation linearises whatever
+the regime, and B/R is to first order linear in that fraction. Two consequences follow. First, the
+natural observable is a channel \emph{ratio}: each channel measures
+illumination times film reflectance, $C_i = I_i\rho_i$, so a lamp change
+that rescales every $I_i$ by a common factor cancels identically (in the
+ideal case) in
+$\mathrm{B/R}=\rho_{\rm B}/\rho_{\rm R}$, while any single channel is
+dominated by illumination; B and R are a natural pair because, for the
+indicator dyes used in CO$_2$-sensing films \cite{mills92}, the two forms
+absorb at opposite ends of the visible, so $\rho_{\rm B}$ and
+$\rho_{\rm R}$ shift in opposite directions. The cancellation is only as
+exact as the LED's spectral stability under duty changes; Sec.~III
+quantifies how well it holds in practice. Second, the protonated fraction obeys the
+Henderson--Hasselbalch relation: the protonated-to-basic ratio is
+proportional to $[\mathrm{H^+}]$, itself proportional to the CO$_2$
+concentration in a base-buffered film \cite{mills92}, so the response is
+smooth, monotonic and close to linear while that ratio remains small.
+Equation~(\ref{eq:chem}) also exposes the first intrinsic weakness: water
+activity enters the equilibrium directly, and the film's water content
+additionally sets its swelling and the indicator's effective p$K_a$, so
+humidity must interfere. The second weakness is kinetic rather than
+thermodynamic: reaching the equilibrium of Eq.~(\ref{eq:chem}) requires gas
+dissolution and diffusion through the film (the CO$_2$ hydration step
+itself adds only seconds), so the ink is \emph{slow}: effective time
+constants of minutes to tens of minutes, dominated by transport.
+
+This slowness dictated the experimental design: long quasi-static
+CO$_2$ triangles ($\sim$11 h per cycle) the film can track; an RH
+staircase held for hours so cross-talk maps separately; LED-duty steps to
+expose what the ratios fail to cancel; and a deliberately fast final
+$\sim$11 h, a stress test reserved for evaluation.
+
+The goal is a sensor as close to \emph{self-contained} as the ink
+allows: CO$_2$ and humidity from its own sixteen numbers, quantifying how
+far that gets with no reference versus one maintenance offset, for a
+prototype EMERGE ink.
+Section III establishes that the ink senses CO$_2$ quantitatively.
+Section IV develops the readout: humidity is recovered directly;
+direct regression (a ladder of models from least squares to recurrent
+networks under one fixed evaluation protocol) fails against the film's
+slow drift, and \emph{how} each rung fails is itself informative; the
+decisive step is that the sensor carries its own drift reference, the
+infrared channel; one maintenance offset provides the remaining
+factor of two.
+
+\section{Experimental setup and dataset}
+
+\subsection{Sensing element and chamber protocol}
+
+The ink is deposited as a film and read in reflectance by four identical
+OnePixel sensors (pixels 0--3), each reporting four channels, red (R),
+green (G), blue (B) and infrared (IR), at 0.2 Hz under LED illumination
+whose duty cycle (``lamp'') is programmable. Both multiplicities are
+deliberate: separating hue from illumination needs several colour
+channels (one channel measures only their product; Sec.~IV demonstrates
+it empirically), and
+four identical pixels give dropout redundancy, noise averaging, and a
+measure of film inhomogeneity that enters the feature set below. The film sits in a sealed chamber fed by three mass-flow-controlled gas
+lines (dry synthetic air, humidified air, CO$_2$), with two co-located
+references: a Sensirion SCD30 NDIR \cite{scd30} for CO$_2$ and a Bosch
+BME280 \cite{bme280} for RH and temperature.
+
+\begin{figure}[t!]
+\centering
+\includegraphics[width=\columnwidth]{fig1_protocol.pdf}
+\caption{The 77 h protocol. Top: programmed CO$_2$ setpoint (grey) and
+the NDIR reference (red); the chamber tracks the setpoint ($r=0.97$) with a
+systematic shortfall at the peaks, one more reason to calibrate against the
+measured reference. Middle: measured relative humidity. Bottom: LED duty
+cycle. Shaded bands mark the validation (grey) and test (yellow) periods;
+everything before them is training data.}
+\label{fig:protocol}
+\end{figure}
+
+The 77-hour protocol (Fig.~\ref{fig:protocol}): five slow triangular
+CO$_2$ sweeps between $\sim$100 and $\sim$1700 ppm ($\sim$11 h each), an
+RH staircase between 17 and 44 \%RH, lamp-duty steps between 20 and
+80 \%, then a deliberately fast final block modulating everything
+simultaneously. All streams were resampled onto a common 5-s grid
+(55\,258 samples, 16 ink channels).
+
+\subsection{Data validation}
+\label{sec:validation}
+
+Every logged channel was first cross-correlated against the two
+references, and this proved essential: the acquisition log names
+the gas channels in an order inconsistent with the recorded data (the
+channel labelled humidity dosing tracks the NDIR CO$_2$ reference at
+$r=0.97$; the one labelled CO$_2$ is the dry-air dilution line). Even the correct setpoint channel overstates the chamber (the SCD30
+reaches $\sim$75\,\% of nominal, $\sim$64\,\% when the humid line runs
+high): the nominal ignores part of the dilution. All results below are therefore calibrated
+against the \emph{measured} references (SCD30 for CO$_2$, BME280 for RH),
+and the true CO$_2$ range is the 100--1700 ppm of
+Fig.~\ref{fig:protocol}. The general lesson:
+calibration targets must be validated against independent measurements
+before any fitting.
+
+\subsection{Learning task and splits}
+\label{sec:task}
+
+The supervised task is joint regression of the measured pair (RH, CO$_2$)
+from ink reflectance only: the 16 raw channels plus 56 derived features
+(per-pixel chromaticity ratios such as B/R and B/(R+G+B), and cross-pixel
+means and standard deviations). Reference channels, setpoints and lamp duty
+are excluded from the inputs: ratios cancel illumination by construction,
+and a control adding the lamp duty as an input changes ridge-72 by
+$\sim$3\,\% while degrading the IR-referenced features. Only the \emph{timing} of lamp changes is used, to
+schedule that offset.
+
+The split is \emph{chronological}: 70/15/15 train/validation/test with
+4-min guard gaps (Fig.~\ref{fig:protocol}); this choice matters more than
+any model choice.
+Adjacent 5-s samples are nearly identical (the chamber and the film evolve
+over minutes), so a \emph{random} split places near-twins of test points in
+the training set. We quantified the damage: the same ridge scores CO$_2$ $R^2=+0.86$
+under a random split and $-4.1$ chronologically, leakage masquerading as
+skill. Every result below is chronological. The price is honesty about distribution shift, and here the
+chronological split is also a \emph{regime} split: the protocol operates
+in three modes, slow CO$_2$ triangles with an RH staircase (train), nearly
+constant CO$_2$ under lamp/RH excursions (validation), and fast
+simultaneous modulation with a quieter tail (test). Generalisation
+therefore means transferring across operating modes as well as across
+time: the test block modulates CO$_2$ on 15-min steps, faster than the
+film's response (Sec.~III), its range narrows to 283--1609 ppm, and the film has aged for days. It also means validation can rank RH models but
+barely CO$_2$ ones, whose variance it lacks. This mirrors a key deployment difficulty: regime shift without
+retraining. As floors, predicting the training mean gives test
+MAE 3.88 \%RH and 197 ppm CO$_2$; a model must beat \emph{these} rather than zero.
+
+\section{Colorimetric characterisation}
+
+\begin{figure}[t!]
+\centering
+\includegraphics[width=\columnwidth]{fig2_calibration.pdf}
+\caption{Colorimetric response. (a) Pixel-averaged B/R (blue, left axis)
+and reference CO$_2$ (red, right axis) during the 50\,\% lamp segment: the
+ratio mirrors the full sweep; the spikes at the edges are lamp transitions.
+(b) RH-corrected, mean-centred B/R versus CO$_2$ for the lamp-stable
+segments with the joint fits of Eq.~(\ref{eq:linmodel}); the 50\,\% lamp
+condition revisited 40 h later (red) gives a slope of the same sign and
+magnitude.}
+\label{fig:calibration}
+\end{figure}
+
+Within any segment of constant lamp duty (excluding the first settling hour),
+the pixel-averaged blue-to-red ratio B/R follows the CO$_2$ sweeps closely
+once the humidity contribution is accounted for. We fit, per segment, the
+linear model
+\begin{equation}
+\mathrm{B/R} = \alpha\,[\mathrm{CO_2}] + \beta\,\mathrm{RH} + \gamma,
+\label{eq:linmodel}
+\end{equation}
+and report $\alpha$ together with the partial correlation between B/R and
+CO$_2$ at fixed RH (Table~\ref{tab:sens}, Fig.~\ref{fig:calibration}). Three
+features stand out. First, within the scatter the response shows no
+detectable curvature over the full 100--1700 ppm range, with sensitivity
+$\alpha \approx -4$ to $-6 \times 10^{-6}$ ppm$^{-1}$ and partial
+correlations reaching $-0.99$, consistent with the dilute limit of the
+indicator equilibrium \cite{mills92}. The sign is the expected one:
+more CO$_2$ acidifies the film, converting the blue-coloured basic form of
+the dye (absorbing in the red) into its protonated form (absorbing in the
+blue), so blue reflectance falls while red recovers and B/R drops. Second, the response \emph{persists}: the 50\,\% lamp condition
+re-measured 40 h later yields a slope of the same sign and magnitude
+($-6.2$ vs $-5.0\times10^{-6}$, $\sim$25\,\%). Lamp and elapsed time are
+confounded, so the monotonic trend of $\alpha$ down Table~\ref{tab:sens}
+need not be an illumination effect; slow gain drift of the ageing film is
+the simpler reading, consistent with Sec.~IV. Third,
+humidity is the dominant interferent: a global fit puts the RH term near
+$10^3$ ppm of apparent CO$_2$ per \%RH, although the staircase protocol,
+which holds RH nearly constant inside lamp-stable segments, leaves $\beta$
+only loosely identified (its per-segment value varies in magnitude and even
+sign); pinning it down needs a protocol that sweeps RH and CO$_2$ jointly.
+Any quantitative use of the ink thus requires simultaneous knowledge of RH,
+which, as shown next, the ink itself provides.
+
+\begin{table}[b!]
+\centering
+\caption{Per-segment joint fits of Eq.~(\ref{eq:linmodel}) in lamp-stable
+windows (first settling hour excluded). $r_p$ is the partial correlation of
+B/R with CO$_2$ at fixed RH. The initial 70\,\% lamp sweep (1--13 h) is reported but excluded from
+the summary: it is the only segment at that lamp level and the only one
+with a fresh, still-equilibrating film, so the two effects are confounded
+($\alpha=-7.5\times10^{-6}$, $r_p=-0.68$).}
+\label{tab:sens}
+\vspace*{1mm}
+\begin{tabular}{ccccc}
+\hline\hline
+Lamp (\%) & $t$ (h) & CO$_2$ (ppm) & $\alpha$ ($10^{-6}$/ppm) & $r_p$ \\
+\hline
+60 & 14--24.5 & 108--1680 & $-4.3$ & $-0.77$ \\
+50 & 25.5--36 & 102--1668 & $-5.0$ & $-0.95$ \\
+40 & 37--46.5 & 99--1486  & $-5.7$ & $-0.99$ \\
+30 & 47.5--55 & 93--1070  & $-5.9$ & $-0.91$ \\
+50 & 75--76.7 & 282--556  & $-6.2$ & $-0.83$ \\
+\hline\hline
+\end{tabular}
+\end{table}
+
+The dynamics are not instantaneous: cross-correlating RH-corrected B/R
+with the NDIR gives a $\sim$3-min apparent lag in slow sweeps but up to
+$\sim$44 min in the fast block. The film acts as a low-pass filter whose apparent lag grows with
+excitation speed; fluctuations faster than it are attenuated, not
+tracked.
+
+\section{Predicting RH and CO$_2$ from reflectance}
+
+\subsection{Models and evaluation}
+
+Table~\ref{tab:ladder} reports every model on identical inputs,
+splits and metrics, with train next to test error so the
+\emph{generalisation gap} is visible per family;
+Fig.~\ref{fig:allmodels} (appendix) shows every fit over the full run.
+Instantaneous-model hyperparameters were tuned on validation only; it
+carries almost no CO$_2$ variance (Sec.~II.C), so the LSTM configuration
+is a representative architecture.
+
+\begin{table}[t!]
+\centering
+\caption{The model ladder, curated to one representative per lesson
+(Fig.~\ref{fig:allmodels} in the appendix shows every fit). Train/test MAE
+for both targets (RH in \%, CO$_2$ in ppm) and test Pearson $r$ for CO$_2$;
+$R^2_{\rm te}<0$ for all CO$_2$ entries except the starred leakage
+control, the IR-referenced ridge ($R^2=0.77$) and the bottom block
+($R^2$ = 0.57/0.65/0.71/0.68). $N_p$ = trainable parameters
+(``---'' = nonparametric). Floors (predict the train mean): 3.88 \%RH,
+197 ppm. Starred row: random-split control (same Ridge-72), fake-good
+from leakage. Bottom block: one 30-min offset per lamp
+change, evaluated on lamp-stable test windows (34\,\% of test);
+LSTM $r$/offset-MAE: five-seed means (other cells one
+archived run); MLP: three-seed means.}
+\label{tab:ladder}
+\vspace*{1mm}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lrcccccl}
+\hline\hline
+ & & \multicolumn{2}{c}{RH MAE} & \multicolumn{2}{c}{CO$_2$ MAE} & & \\
+\cline{3-4}\cline{5-6}
+Model & $N_p$ & tr & te & tr & te & $r_{\rm te}$ & What it teaches \\
+\hline
+Ridge, 72 features   & 146  & 0.17 & 0.88 & 119 & 403  & 0.76 & physics-guided features help \\
+Ridge + high-pass 4 h& 578  & 0.04 & 0.77 & 44  & 297  & 0.43 & drift lives at low frequency \\
+Ridge, 12 (R,G,B)/IR & 26   & 0.27 & 1.74 & 179 & {\bf 103} & {\bf 0.90} & IR reference cancels drift \\
+MLP 128$\times$64, reg. & 18k & 0.23 & 1.34 & 26  & 521  & 0.70 & regularisation alone did not fix drift \\
+LSTM, 6-h coarse     & 21k  & 0.14 & 0.69 & 19  & 654  & 0.81 & long context: shape, not scale \\
+Ridge-72, random split$^\ast$ & 146 & 0.16 & 0.16 & 110 & 112 & 0.93$^\ast$ & leakage looks like skill \\
+\hline
+Hold calibration value & 0   & ---  & ---  & --- & 54   & 0.79 & the bar recalibration sets \\
+B/R + RH + recal.    & 3    & ---  & ---  & --- & 54   & 0.82 & ties the bar, tracks better \\
+(R,G,B)/IR + offset  & 26   & ---  & ---  & --- & {\bf 50} & {\bf 0.91} & the deployable readout \\
+LSTM 6-h + offset    & 21k  & ---  & ---  & --- & 48 & 0.82 & regime-sensitive experiment \\
+\hline\hline
+\end{tabular}}
+\end{table}
+
+\subsection{Humidity}
+
+\begin{figure}[t!]
+\centering
+\includegraphics[width=\columnwidth]{fig3_predictions.pdf}
+\caption{Test-block predictions. (a) RH from ink reflectance alone.
+(b) The 6-h-context LSTM tracks the CO$_2$ oscillations ($r=0.81\pm0.03$
+over seeds; best of five shown, drawn after its 6-h warm-up) but loses the
+absolute scale; for display its output is affinely rescaled, which is
+precisely the calibration a deployment must supply. (c) The same LSTM
+with one 30-min offset per lamp change (red, drawn where evaluated)
+recovers absolute CO$_2$ in the lamp-stable windows. Fluctuations faster
+than the film's $\sim$44-min apparent lag are smoothed by the ink
+itself.}
+\label{fig:predictions}
+\end{figure}
+
+
+Against the 3.88 \%RH floor, an RH-tuned ridge (8-h high-pass window,
+selected per target on validation) reaches {\bf MAE 0.35 \%RH,
+$R^2=0.993$} on the test block (Fig.~\ref{fig:predictions}a). Physically
+expected: water activity enters Eq.~(\ref{eq:chem}) directly.
+An ablation pins the mechanism: red alone fails below the floor
+(4.4 \%RH; one band is absorbance times illumination), one pixel's four
+colours recover 0.60 \%RH, and sixteen raw channels do \emph{worse} than
+four (1.04). The RH signal is spectral, and the ink itself measures its dominant
+interferent.
+
+\subsection{CO$_2$ by direct regression}
+
+The same recipes collapse on CO$_2$: every plain learner ends below the
+197-ppm floor, killed by the slow baseline drift of the ageing film.
+The failures are systematic and each teaches something
+(Table~\ref{tab:ladder}). Least squares on the 16 raw channels
+memorises the training period (train 87, test 1549 ppm); engineered ratios
+repair it partly (403 ppm), and causal high-pass features help CO$_2$ best
+at 4 h (297 ppm) while RH prefers 8 h: the CO$_2$ signal rides a baseline
+whose drift overlaps the protocol cycles. A capacity triplet of
+unregularised MLPs (4.8k/85k/2.2M parameters; single runs) shows the
+expected overfitting pattern, train error falling
+(25\,$\to$\,12\,$\to$\,10 ppm) while test error rises
+(671\,$\to$\,900\,$\to$\,1030 ppm); regularising properly does not save
+it (a val-selected 128$\times$64 net with dropout, weight decay and early
+stopping: $521\pm67$ ppm, $r=0.70$). Sequence models do best: an LSTM reading six hours of 60-s-averaged
+context becomes the ladder's best shape-tracker ($r=0.81\pm0.03$ over five
+seeds, Fig.~\ref{fig:predictions}b), yet still posts MAE $\approx$650
+ppm: no context length we could test (up to 8 h) supplies the absolute
+anchor. The conclusion is consistent across families: none of them, linear to
+recurrent, infers the drift from the visible channels; added capacity only
+memorises it.
+
+\subsection{CO$_2$ with an infrared reference}
+
+The way out is not a bigger model but a better ratio. The dye barely
+modulates the \emph{infrared} channel, while B and IR share a slow common drift, consistent with
+emitter/detector ageing: train$\to$test, B/IR shifts only 0.26
+train-$\sigma$ vs 1.09 for B/R and 0.69 for raw B. A ridge on
+the twelve (R,G,B)/IR ratios reaches {\bf MAE 103 ppm, $R^2=0.77$,
+$r=0.90$ with no correction at all}, the only model that beats the
+constant floor unaided; its test error is \emph{lower} than its
+training error (103 vs 179 ppm, partly because the test range is
+narrower), so it is not exploiting training-period quirks. The reference
+cancels drift common to the channels but not lamp steps (IR barely follows
+the duty cycle), which is what the remaining error is made of. The fitted weights load mainly on the red-channel ratios with opposing
+signs across pixels, consistent with between-pixel common-mode rejection
+(coefficients of collinear features should not be read literally); tiny
+MLPs only lose, consistent with an essentially linear relation.
+
+\subsection{CO$_2$ with one offset per illumination change}
+
+After an illumination change no ink signal supplies the absolute
+anchor; the standard remedy is one offset, measured against a reference in
+the first 30 min of each lamp segment (samples excluded; evaluated
+windows = 34\,\% of test, 283--623 ppm). The relevant baseline is strict: holding the calibration value
+already gives 54 ppm ($R^2=0.57$); the corrected ridge (122) and MLP
+(79, one seed) fall short, and the three-parameter
+Eq.~(\ref{eq:linmodel}) ties it with better tracking ($R^2=0.65$), with
+measured or ink-derived RH alike.
+The IR-referenced ridge beats the bar: {\bf 50 ppm, $R^2=0.71$,
+$r=0.91$} (Fig.~\ref{fig:predictions}c), twelve features,
+selected by validation (Fig.~\ref{fig:summary}). The six-hour LSTM matches it numerically ($47.7\pm1.2$ ppm over five
+seeds) but only while training matches the test regime; in the single
+refit run of Sec.~IV.F it collapses, and it is reported as an \emph{experiment} on temporal
+context. Without the offset, Eq.~(\ref{eq:linmodel})
+fails like everything else (171 ppm): the residual drift could only be
+removed by measuring it.
+
+Three caveats bound these numbers. The offsets are computed against the
+co-located NDIR reference, so a deployment needs a reference channel or a
+reference-free scheme (e.g.\ baseline autocalibration \cite{vergara}).
+All results come from one film in one 77-h run. The single-ratio B/R noise after 60-s averaging,
+$\sim$$1.1\times10^{-4}$ ($\approx$22 ppm at the measured sensitivity),
+is an indicative resolution scale; in practice drift dominates the
+error budget. Chamber temperature (27.3--31.2 $^\circ$C) correlates
+weakly with the residuals ($r=0.26$), so it is not the dominant term,
+though its
+full influence is unconstrained here.
+
+These limits also say what the ink \emph{is} for. As a ppm meter it
+needs slow environments and an occasional anchor; as an \emph{indicator},
+neither: with no correction at all, the IR-referenced readout reaches
+AUC 0.98 at 800 ppm and 0.99 at 1000 ppm (accuracies 92\,\% and 96\,\%
+against majority-class baselines of 79\,\% and 88\,\%). That is the regime of modified-atmosphere food packaging: a printed
+label, read by a phone camera, that asks only whether the level is above
+a threshold.
+
+\subsection{Adding the validation block to training}
+
+Refitting on train+validation after selection (injecting lamp/RH
+variation at constant CO$_2$) improves every instantaneous model
+markedly (ridge+HP 297$\to$137 ppm, MLP 521$\to$155, IR ridge
+103$\to$86 without correction and 50$\to$45 ppm with offset, in this single
+configuration),
+while the recurrent model collapses in our single refit run
+($r$ 0.81$\pm$0.03 $\to$ 0.05, one seed), consistent with the added
+block teaching a wrong temporal regime. This suggests the binding constraint is the data itself: one film,
+one run, five similar sweeps, one confounder block.
+
+\section{Conclusions}
+\begin{itemize}
+\item The ink is a genuine CO$_2$ sensor: in lamp-stable conditions
+B/R shows no detectable deviation from linearity over 100--1700 ppm
+($\alpha \approx -5\times10^{-6}$ ppm$^{-1}$, partial correlations
+to $-0.99$); the slope keeps sign and magnitude after 40 h
+($\sim$25\,\% gain drift, absorbed by the IR reference).
+
+\item Humidity is both the dominant interferent (order $10^3$ ppm per
+\%RH, loosely identified) and accurately recoverable from the ink
+itself on this film (MAE 0.35 \%RH, $R^2=0.993$).
+
+\item Absolute CO$_2$ readout is limited by slow drift rather than
+model capacity; most of that drift is channel-common and cancelled by the
+infrared reference: a 12-feature (R,G,B)/IR linear model reaches 103 ppm
+($R^2=0.77$) without correction and 50 ppm with one 30-min offset per
+illumination change (45 in a single refit on all pre-test data); all
+results are one-film, reference-anchored.
+
+\item A central limitation is the \emph{speed} of the CO$_2$ changes:
+training gives the film hours to adapt, the test protocol only minutes;
+the apparent lag grows from $\sim$3 to $\sim$44 min under fast
+modulation. Fluctuations faster than this are physically unrecoverable, a
+floor on test error distinct from model failure (lag correction is not the lever; Appendix); this sets the
+application envelope (slowly varying air); next: drift-stable references,
+an orthogonal RH$\times$CO$_2$ sweep, a multi-film repeat. In threshold mode the absolute-anchor requirement disappears
+(AUC 0.98 at 800 ppm with no correction): the smart-packaging regime.
+
+\item Methodologically, validating every channel against independent
+references proved decisive: it exposed a channel-labelling inconsistency
+and redefined the calibration targets.
+\end{itemize}
+
+\begin{acknowledgments}
+I thank my advisor, Ismael Benito Altamirano, and Cristian F\`abrega
+with the EMERGE collaboration for ink, chamber and measurements.
+\end{acknowledgments}
+
+\vspace*{-4mm}
+\begin{thebibliography}{99}
+
+\bibitem{satish} U. Satish {\it et al.}, ``Is CO$_2$ an indoor pollutant?
+Direct effects of low-to-moderate CO$_2$ concentrations on human
+decision-making performance'', Environ. Health Perspect. {\bf 120},
+1671--1677 (2012).
+
+\bibitem{mills92} A. Mills, Q. Chang and N. McMurray, ``Equilibrium studies
+on colorimetric plastic film sensors for carbon dioxide'', Anal. Chem.
+{\bf 64}, 1383--1389 (1992).
+
+\bibitem{scd30} Sensirion AG, {\it SCD30 CO$_2$ sensor datasheet}
+(2020).
+
+\bibitem{bme280} Bosch Sensortec, {\it BME280 humidity and pressure
+sensor datasheet} (2022).
+
+\bibitem{vergara} A. Vergara {\it et al.}, ``Chemical gas sensor
+drift compensation using classifier ensembles'', Sens. Actuators B
+{\bf 166}, 320 (2012).
+
+\end{thebibliography}
+
+\clearpage
+
+\title{Lectura per aprenentatge autom\`atic d'una tinta colorim\`etrica
+sensible al CO$_2$}
+
+\begin{abstract}
+{\bf Resum:} Una via de baix cost per monitorar el CO$_2$ \'es una tinta
+colorim\`etrica el color de la qual canvia amb la concentraci\'o de CO$_2$,
+llegida per sensors de reflect\`ancia miniaturitzats. Caracteritzem una
+tinta d'aquest tipus dins d'una cambra de mescla de gasos durant un protocol
+de 77 hores que escombra el CO$_2$ ($\sim$100--1700 ppm), la humitat relativa
+(HR) i la il$\cdot$luminaci\'o, enregistrant quatre p\'ixels de reflect\`ancia
+vermell--verd--blau--infraroig juntament amb una refer\`encia NDIR
+(CO$_2$) i una d'HR. Despr\'es de validar el conjunt de dades amb les refer\`encies
+mesurades, mostrem que la ra\'o blau/vermell respon linealment al CO$_2$ amb
+sensibilitat $\approx -5\times10^{-6}$\,ppm$^{-1}$, una sensibilitat creuada
+a l'HR de l'ordre de $10^3$ ppm per \%HR, i un retard de resposta de minuts a
+desenes de minuts. Comparem models de calibratge de capacitat creixent, des dels m\'inims
+quadrats fins a xarxes neuronals recurrents. La humitat
+es recupera nom\'es amb la tinta (MAE 0,35\,\%, $R^2=0{,}993$); per al CO$_2$
+absolut, referenciar cada canal de color a l'infraroig co-mesurat
+cancel$\cdot$la la major part de la deriva \`optica lenta: un model lineal
+de 12 caracter\'istiques assoleix MAE 103 ppm ($R^2=0{,}77$) sense cap
+correcci\'o, i 50 ppm amb un ajust puntual per canvi
+d'il$\cdot$luminaci\'o, sobre el 34\,\% del bloc de test estable en
+il$\cdot$luminaci\'o.
+
+\keywordcat{detecci\'o colorim\`etrica, sensor de CO$_2$, reflect\`ancia
+\`optica, aprenentatge autom\`atic, regressi\'o, deriva de sensors}
+\ods{3, 9, 11, 13}
+\end{abstract}
+
+\maketitle
+\thispagestyle{fancy}
+
+\onecolumngrid
+\vspace{-0.5cm}
+\section*{Objectius de Desenvolupament Sostenible (ODSs o SDGs)}
+\vspace{-0.2cm}
+\begin{center}
+\begin{tabular}{|l|c|l|c|}
+\hline
+1. Fi de la pobresa & & 10. Reducci\'o de les desigualtats &\\ \hline
+2. Fam zero	               &  &	11. Ciutats i comunitats sostenibles	& X \\  \hline
+3. Salut i benestar	      & X &	12. Consum i producci\'o responsables& \\  \hline
+4. Educaci\'o de qualitat   &  &	13. Acci\'o clim\`atica	& X \\  \hline
+5. Igualtat de g\`enere	      &  &	14. Vida submarina	& \\  \hline
+6. Aigua neta i sanejament &  &	15. Vida terrestre	& \\  \hline
+7. Energia neta i sostenible &  &	16. Pau, just\'icia i institucions s\`olides	& \\  \hline
+8. Treball digne i creixement econ\`omic &  & 17. Alian\c{c}a pels objectius	& \\  \hline
+9. Ind\'ustria, innovaci\'o, infraestructures & X &  & \\
+\hline
+\end{tabular}
+\end{center}
+\vspace{0.1cm}
+El contingut d'aquest TFG es relaciona amb l'ODS 3 (Salut i benestar), fita
+3.9, ja que el monitoratge de la qualitat de l'aire interior mitjan\c{c}ant
+sensors de CO$_2$ de baix cost contribueix a reduir l'exposici\'o de les
+persones a ambients mal ventilats. Es relaciona tamb\'e amb l'ODS 9
+(Ind\'ustria, innovaci\'o, infraestructures), fita 9.5, perqu\`e desenvolupa i
+caracteritza una tecnologia de sensors innovadora i de baix consum; amb
+l'ODS 11 (Ciutats i comunitats sostenibles), fita 11.6, perqu\`e un
+monitoratge ambiental assequible i ubic \'es una eina per a edificis i
+ciutats m\'es saludables; i amb l'ODS 13 (Acci\'o clim\`atica), fita 13.3, ja
+que millora la capacitat de mesura del CO$_2$, el principal gas amb efecte
+d'hivernacle d'origen antropog\`enic.
+
+\clearpage
+\twocolumngrid
+\appendix
+\section{SUPPLEMENTARY MATERIAL}
+
+\begin{figure}[b!]
+\centering
+\includegraphics[width=\columnwidth]{fig6_summary.pdf}
+\caption{Summary: test CO$_2$ MAE of the main models (log scale).
+Direct regression never beats the constant-prediction floor; the
+IR-referenced ridge beats it with no correction (103 ppm); with one 30-min
+offset per lamp change, it and the six-hour LSTM tie at 50/48 ppm.}
+\label{fig:summary}
+\end{figure}
+
+\begin{figure*}[t!]
+\centering
+\includegraphics[width=0.96\textwidth]{fig5_allmodels.pdf}
+\caption{Four models over the full 77 h run, every one fitted on the
+training block only: prediction (red, clipped to the axis range) against
+the NDIR reference (grey); validation (grey band) and test (yellow band)
+marked. Each model fits the training period;
+the bands reveal who generalises. The large MLP and Ridge-72 lose the
+scale to drift; the LSTM keeps the shape; only the uncorrected
+IR-referenced ridge stays on the measured trace throughout. Quoted MAEs
+are the test values of Table~\ref{tab:ladder}.}
+\label{fig:allmodels}
+\end{figure*}
+
+\begin{table}[b!]
+\centering
+\caption{Configurations behind Table~\ref{tab:ladder}. All models:
+standardised inputs, chronological splits; ridge/MLP hyperparameters
+chosen on validation.}
+\label{tab:hyper}
+\vspace*{1mm}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lll}
+\hline\hline
+Model & Inputs & Key settings \\
+\hline
+Ridge & 72 feat. & $\alpha\in\{10,10^2,10^3\}$ on val \\
+Ridge + HP & 72 + 216 high-pass & HP windows 1/2/4/8 h, + 5/15-min smooth \\
+MLP & 72 feat. & ReLU 128$\times$64, drop 0.2, wd $10^{-4}$, early stop \\
+LSTM (coarse) & 16 raw, 60-s MA, 1/min & $W{=}360$ (6 h), hidden 64, 40 epochs \\
+B/R + RH & pixel-mean B/R, RH & least squares on train; 30-min offset \\
+\hline\hline
+\end{tabular}}
+\end{table}
+
+
+{\bf Training details} (Table~\ref{tab:hyper}){\bf .} The ridge penalty ($\in\{10,10^2,10^3\}$) and the
+high-pass window were selected on the validation block only. The LSTMs use a
+single recurrent layer of 64 units trained with Adam (learning rate
+$10^{-3}$, 25--40 epochs, batch 512) on standardised inputs and targets;
+training windows are strided by 30 s, test windows by 5 s. The coarse-context
+variant first applies a 60-s moving average to the 16 channels, resamples at
+one point per minute, and reads windows of 360 such points (6 h); a 12-h
+window is not measurable because the test block is only 11.5 h long.
+Window-normalised LSTMs (each input window z-scored independently, 30/60-min
+windows) end at CO$_2$ MAE 386/299 ppm with $r=0.12/0.10$. All models receive identical
+chronological splits with 4-min guard gaps; stochastic models (MLPs,
+LSTMs) use a fixed random seed and each configuration is a single run,
+except the coarse-context LSTM and its recalibrated variant (five
+seeds: shape $r$ 0.76--0.85; corrected MAE 46.7--49.9 ppm) and the
+regularised MLP (three seeds). All rolling windows are trailing
+(causal).
+
+{\bf Recalibration policy.} The 30-min window after each lamp change is used
+to fit a single additive offset per model and segment; those samples are
+excluded from all reported metrics, and windows shorter than 30 min
+contribute no evaluated samples. Evaluated coverage is 34\,\% of the test
+period (3.9 h), spanning 283--623 ppm. Reducing the calibration window to
+10 min degrades the physical model to MAE $\sim$100 ppm; extending it to
+60 min shrinks the evaluated windows and also degrades the result.
+
+{\bf What else was tried.} (0) Raw-window LSTMs (5--30 min of 5-s
+history) reach only 574--582 ppm: the relevant history exceeds any
+affordable raw window, which motivated the coarse-context design.
+(i) A derivative-predicting RNN integrated
+from each anchor (dead reckoning, 10-seed ensemble) won validation
+decisively but lost on test (61 ppm): a derivative bias of only
+0.025 ppm\,s$^{-1}$ is invisible in dynamics-rich validation yet fatal in
+flat test windows: regime mismatch can silently invert rankings.
+(ii) Kinetic features ($d/dt$, $d^2/dt^2$ of ratios and channels at 1--60
+min scales) all lost to their static controls, and lead-compensating the
+film's lag was rejected at every $\tau$ from 3 to 90 min: differentiation
+amplifies the RH signal; lag compensation is not the lever. (iii) A
+PatchTST-style transformer (105k params, val-selected, 3 seeds) lost to the
+LSTM on every metric (85 vs 48 ppm corrected; shape $r\approx-0.4$).
+(iv) Adversarial RH-decoupling via gradient reversal only hides RH from
+the online head: a fresh probe still recovers RH at $R^2\approx0.93$, and
+forcing real invariance collapses CO$_2$ in lockstep: the two signals
+share the protonation pathway and cannot be separated in this ink.
+
+{\bf Train+validation refit.} Full numbers of the Sec.~IV.F refit:
+ridge-72 403$\to$250 ($R^2$ still $<0$); ridge+HP 297$\to$137
+($R^2=0.48$); MLP 521$\to$155 ($R^2=0.33$); IR ridge 103$\to$86
+($R^2=0.80$, $r=0.92$) and, with the offset, 50$\to$45 ppm
+($R^2=0.76$); B/R+RH+offset 54$\to$53; LSTM 6-h shape $r$ 0.81$\to$0.05
+and 48$\to$93 ppm with offset. The validation block teaches confounder
+robustness to instantaneous models and a wrong temporal regime to
+recurrent ones.
+
+{\bf Reproducibility.} The full pipeline (corrected dataset, feature
+construction, every model in the ladder, and figure scripts) is a set of
+Python/scikit-learn scripts run end-to-end; total training time
+is under five minutes on CPU for all linear models plus
+$\sim$10 min on one GPU for the LSTM variants.
+
+\end{document}

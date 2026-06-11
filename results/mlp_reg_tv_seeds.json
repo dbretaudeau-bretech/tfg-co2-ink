@@ -1,0 +1,16 @@
+{
+ "seeds": [
+  0,
+  1,
+  2
+ ],
+ "test_mae": [
+  159.82,
+  147.4,
+  158.52
+ ],
+ "mean": 155.0,
+ "std": 6.0,
+ "config": "MLP 128x64 drop0.2 wd1e-4, 30 epochs fixed, trained on train+val, deterministic torch.manual_seed",
+ "reproduce": "see session script; deterministic given seeds"
+}

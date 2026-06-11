@@ -1,0 +1,586 @@
+{
+ "P1_p24_d128_L3_dr01_s0": {
+  "cfg": {
+   "name": "P1_p24_d128_L3_dr01"
+  },
+  "seed": 0,
+  "n_params": 406914,
+  "best_epoch": 1,
+  "sec": 13.1,
+  "val": {
+   "loss": 1.21764,
+   "RH": {
+    "mae": 7.8,
+    "r2": -0.361,
+    "pearson": 0.383
+   },
+   "CO2_norecal": {
+    "mae": 235.89,
+    "r2": -1.907,
+    "pearson": -0.344
+   },
+   "CO2_recal": {
+    "mae": 121.06,
+    "r2": 0.09,
+    "pearson": 0.6,
+    "used_frac": 0.541
+   }
+  }
+ },
+ "P2_p12_d128_L3_dr01_s0": {
+  "cfg": {
+   "name": "P2_p12_d128_L3_dr01",
+   "patch": 12
+  },
+  "seed": 0,
+  "n_params": 407298,
+  "best_epoch": 0,
+  "sec": 18.0,
+  "val": {
+   "loss": 1.83912,
+   "RH": {
+    "mae": 9.29,
+    "r2": -0.958,
+    "pearson": 0.255
+   },
+   "CO2_norecal": {
+    "mae": 352.9,
+    "r2": -4.275,
+    "pearson": -0.833
+   },
+   "CO2_recal": {
+    "mae": 107.57,
+    "r2": 0.11,
+    "pearson": 0.615,
+    "used_frac": 0.541
+   }
+  }
+ },
+ "P3_p30_d128_L3_dr01_s0": {
+  "cfg": {
+   "name": "P3_p30_d128_L3_dr01",
+   "patch": 30
+  },
+  "seed": 0,
+  "n_params": 407298,
+  "best_epoch": 2,
+  "sec": 12.0,
+  "val": {
+   "loss": 1.32917,
+   "RH": {
+    "mae": 8.18,
+    "r2": -0.546,
+    "pearson": 0.147
+   },
+   "CO2_norecal": {
+    "mae": 238.25,
+    "r2": -1.62,
+    "pearson": 0.236
+   },
+   "CO2_recal": {
+    "mae": 151.68,
+    "r2": -0.475,
+    "pearson": 0.467,
+    "used_frac": 0.541
+   }
+  }
+ },
+ "P4_p24_d64_L3_dr01_s0": {
+  "cfg": {
+   "name": "P4_p24_d64_L3_dr01",
+   "d_model": 64,
+   "heads": 4
+  },
+  "seed": 0,
+  "n_params": 105154,
+  "best_epoch": 0,
+  "sec": 5.7,
+  "val": {
+   "loss": 1.29781,
+   "RH": {
+    "mae": 8.47,
+    "r2": -0.596,
+    "pearson": 0.104
+   },
+   "CO2_norecal": {
+    "mae": 191.19,
+    "r2": -0.771,
+    "pearson": 0.29
+   },
+   "CO2_recal": {
+    "mae": 83.11,
+    "r2": 0.574,
+    "pearson": 0.809,
+    "used_frac": 0.541
+   }
+  }
+ },
+ "P5_p24_d128_L2_dr01_s0": {
+  "cfg": {
+   "name": "P5_p24_d128_L2_dr01",
+   "depth": 2
+  },
+  "seed": 0,
+  "n_params": 274434,
+  "best_epoch": 1,
+  "sec": 8.7,
+  "val": {
+   "loss": 1.51163,
+   "RH": {
+    "mae": 8.49,
+    "r2": -0.619,
+    "pearson": 0.381
+   },
+   "CO2_norecal": {
+    "mae": 292.2,
+    "r2": -3.244,
+    "pearson": -0.404
+   },
+   "CO2_recal": {
+    "mae": 97.52,
+    "r2": 0.357,
+    "pearson": 0.743,
+    "used_frac": 0.541
+   }
+  }
+ },
+ "P6_p24_d128_L3_dr02_s0": {
+  "cfg": {
+   "name": "P6_p24_d128_L3_dr02",
+   "dropout": 0.2
+  },
+  "seed": 0,
+  "n_params": 406914,
+  "best_epoch": 1,
+  "sec": 12.5,
+  "val": {
+   "loss": 1.28771,
+   "RH": {
+    "mae": 8.21,
+    "r2": -0.517,
+    "pearson": 0.38
+   },
+   "CO2_norecal": {
+    "mae": 226.52,
+    "r2": -1.368,
+    "pearson": -0.195
+   },
+   "CO2_recal": {
+    "mae": 129.74,
+    "r2": -0.06,
+    "pearson": 0.519,
+    "used_frac": 0.541
+   }
+  }
+ },
+ "P7_p24_d64_L2_dr02_s0": {
+  "cfg": {
+   "name": "P7_p24_d64_L2_dr02",
+   "d_model": 64,
+   "heads": 4,
+   "depth": 2,
+   "dropout": 0.2
+  },
+  "seed": 0,
+  "n_params": 71682,
+  "best_epoch": 0,
+  "sec": 4.1,
+  "val": {
+   "loss": 1.34016,
+   "RH": {
+    "mae": 8.59,
+    "r2": -0.594,
+    "pearson": -0.092
+   },
+   "CO2_norecal": {
+    "mae": 184.39,
+    "r2": -1.325,
+    "pearson": 0.093
+   },
+   "CO2_recal": {
+    "mae": 89.82,
+    "r2": 0.534,
+    "pearson": 0.773,
+    "used_frac": 0.541
+   }
+  }
+ },
+ "P8_p12_d64_L2_dr01_s0": {
+  "cfg": {
+   "name": "P8_p12_d64_L2_dr01",
+   "patch": 12,
+   "d_model": 64,
+   "heads": 4,
+   "depth": 2
+  },
+  "seed": 0,
+  "n_params": 71874,
+  "best_epoch": 0,
+  "sec": 6.4,
+  "val": {
+   "loss": 1.34724,
+   "RH": {
+    "mae": 8.31,
+    "r2": -0.517,
+    "pearson": 0.149
+   },
+   "CO2_norecal": {
+    "mae": 268.94,
+    "r2": -2.116,
+    "pearson": -0.774
+   },
+   "CO2_recal": {
+    "mae": 107.98,
+    "r2": -0.012,
+    "pearson": 0.519,
+    "used_frac": 0.541
+   }
+  }
+ },
+ "S_P1_p24_d128_L3_dr01_s0": {
+  "cfg": {
+   "name": "S_P1_p24_d128_L3_dr01"
+  },
+  "seed": 0,
+  "n_params": 406914,
+  "best_epoch": 1,
+  "sec": 13.1,
+  "val": {
+   "loss": 1.21764,
+   "RH": {
+    "mae": 7.8,
+    "r2": -0.361,
+    "pearson": 0.383
+   },
+   "CO2_norecal": {
+    "mae": 235.89,
+    "r2": -1.907,
+    "pearson": -0.344
+   },
+   "CO2_recal": {
+    "mae": 121.06,
+    "r2": 0.09,
+    "pearson": 0.6,
+    "used_frac": 0.541
+   }
+  }
+ },
+ "S_P1_p24_d128_L3_dr01_s1": {
+  "cfg": {
+   "name": "S_P1_p24_d128_L3_dr01"
+  },
+  "seed": 1,
+  "n_params": 406914,
+  "best_epoch": 0,
+  "sec": 11.3,
+  "val": {
+   "loss": 1.58294,
+   "RH": {
+    "mae": 9.18,
+    "r2": -0.95,
+    "pearson": 0.199
+   },
+   "CO2_norecal": {
+    "mae": 213.6,
+    "r2": -1.133,
+    "pearson": -0.23
+   },
+   "CO2_recal": {
+    "mae": 125.9,
+    "r2": -0.189,
+    "pearson": 0.437,
+    "used_frac": 0.541
+   }
+  }
+ },
+ "S_P1_p24_d128_L3_dr01_s2": {
+  "cfg": {
+   "name": "S_P1_p24_d128_L3_dr01"
+  },
+  "seed": 2,
+  "n_params": 406914,
+  "best_epoch": 0,
+  "sec": 11.3,
+  "val": {
+   "loss": 1.24769,
+   "RH": {
+    "mae": 7.41,
+    "r2": -0.16,
+    "pearson": 0.25
+   },
+   "CO2_norecal": {
+    "mae": 333.46,
+    "r2": -4.113,
+    "pearson": -0.128
+   },
+   "CO2_recal": {
+    "mae": 81.78,
+    "r2": 0.409,
+    "pearson": 0.72,
+    "used_frac": 0.541
+   }
+  }
+ },
+ "S_P4_p24_d64_L3_dr01_s0": {
+  "cfg": {
+   "name": "S_P4_p24_d64_L3_dr01",
+   "d_model": 64,
+   "heads": 4
+  },
+  "seed": 0,
+  "n_params": 105154,
+  "best_epoch": 0,
+  "sec": 5.7,
+  "val": {
+   "loss": 1.29781,
+   "RH": {
+    "mae": 8.47,
+    "r2": -0.596,
+    "pearson": 0.104
+   },
+   "CO2_norecal": {
+    "mae": 191.19,
+    "r2": -0.771,
+    "pearson": 0.29
+   },
+   "CO2_recal": {
+    "mae": 83.11,
+    "r2": 0.574,
+    "pearson": 0.809,
+    "used_frac": 0.541
+   }
+  }
+ },
+ "S_P4_p24_d64_L3_dr01_s1": {
+  "cfg": {
+   "name": "S_P4_p24_d64_L3_dr01",
+   "d_model": 64,
+   "heads": 4
+  },
+  "seed": 1,
+  "n_params": 105154,
+  "best_epoch": 42,
+  "sec": 30.5,
+  "val": {
+   "loss": 1.27478,
+   "RH": {
+    "mae": 7.52,
+    "r2": -0.351,
+    "pearson": 0.325
+   },
+   "CO2_norecal": {
+    "mae": 266.2,
+    "r2": -2.709,
+    "pearson": 0.219
+   },
+   "CO2_recal": {
+    "mae": 133.49,
+    "r2": 0.089,
+    "pearson": 0.535,
+    "used_frac": 0.541
+   }
+  }
+ },
+ "S_P4_p24_d64_L3_dr01_s2": {
+  "cfg": {
+   "name": "S_P4_p24_d64_L3_dr01",
+   "d_model": 64,
+   "heads": 4
+  },
+  "seed": 2,
+  "n_params": 105154,
+  "best_epoch": 6,
+  "sec": 9.2,
+  "val": {
+   "loss": 1.26064,
+   "RH": {
+    "mae": 8.08,
+    "r2": -0.495,
+    "pearson": 0.131
+   },
+   "CO2_norecal": {
+    "mae": 219.79,
+    "r2": -1.228,
+    "pearson": 0.147
+   },
+   "CO2_recal": {
+    "mae": 116.23,
+    "r2": 0.291,
+    "pearson": 0.618,
+    "used_frac": 0.541
+   }
+  }
+ },
+ "SUMMARY": {
+  "idea": "IDEA 3 \u2014 PatchTST-style transformer replacing the champion coarse-context LSTM; same grid/window/recal protocol",
+  "mamba": "SKIPPED \u2014 mamba-ssm not installed in the TFGV2 venv (torch 2.12 nightly cu128; would need a source build). PatchTST only.",
+  "final_architecture": {
+   "input": "16 raw ink channels, 60-s MA, 1/min resample, window 360 steps (6 h), standardized on train",
+   "model": "channel-independent PatchTST: patch len 24 (non-overlap, 15 patches), linear embed 24->64 shared across channels, learnable pos enc, 3 pre-norm encoder layers (d_model 64, 4 heads, ff 128, GELU, dropout 0.1), LayerNorm + mean-pool over patches, concat 16x64 channel embeddings -> linear -> (RH, CO2)",
+   "params": 107000,
+   "train": "Adam 1e-3, batch 256, MSE on standardized joint targets, early stop on val loss (patience 8)"
+  },
+  "selection": {
+   "grid": "8 configs (patch 12/24/30, depth 2/3, d_model 64/128, dropout 0.1/0.2), seed 0, ranked on validation only",
+   "finalists_3seed_val": {
+    "P1_p24_d128_L3_dr01": {
+     "val_loss": [
+      1.349,
+      0.166
+     ],
+     "val_recal_CO2_mae": [
+      109.6,
+      19.8
+     ],
+     "val_recal_r": 0.586
+    },
+    "P4_p24_d64_L3_dr01": {
+     "val_loss": [
+      1.278,
+      0.015
+     ],
+     "val_recal_CO2_mae": [
+      110.9,
+      20.9
+     ],
+     "val_recal_r": 0.654
+    }
+   },
+   "winner": "P4_p24_d64_L3_dr01 (better mean+stability of val loss, better val recal r)",
+   "honesty_note": "val CO2 ranking is weak on this dataset (regime flip between chronological blocks); selection used val loss + val recal protocol as agreed. Test read once, for the frozen winner only."
+  },
+  "test_final_3seeds_mean_std": {
+   "CO2_recal_protocol": {
+    "mae": [
+     103.88,
+     46.792
+    ],
+    "r2": [
+     -0.669,
+     1.537
+    ],
+    "pearson": [
+     0.362,
+     0.482
+    ]
+   },
+   "CO2_norecal_full_test": {
+    "mae": [
+     333.807,
+     19.75
+    ],
+    "r2": [
+     -2.074,
+     0.464
+    ],
+    "pearson": [
+     -0.24,
+     0.322
+    ]
+   },
+   "RH_full_test": {
+    "mae": [
+     5.1,
+     0.404
+    ],
+    "r2": [
+     -0.611,
+     0.171
+    ],
+    "pearson": [
+     -0.363,
+     0.06
+    ]
+   },
+   "per_seed": {
+    "s0": {
+     "RH": {
+      "mae": 5.53,
+      "r2": -0.808,
+      "pearson": -0.294
+     },
+     "CO2_norecal": {
+      "mae": 325.52,
+      "r2": -1.596,
+      "pearson": 0.215
+     },
+     "CO2_recal": {
+      "mae": 74.05,
+      "r2": 0.369,
+      "pearson": 0.655,
+      "used_frac": 0.344
+     }
+    },
+    "s1": {
+     "RH": {
+      "mae": 5.21,
+      "r2": -0.634,
+      "pearson": -0.354
+     },
+     "CO2_norecal": {
+      "mae": 361.05,
+      "r2": -2.703,
+      "pearson": -0.464
+     },
+     "CO2_recal": {
+      "mae": 67.64,
+      "r2": 0.466,
+      "pearson": 0.749,
+      "used_frac": 0.344
+     }
+    },
+    "s2": {
+     "RH": {
+      "mae": 4.56,
+      "r2": -0.39,
+      "pearson": -0.441
+     },
+     "CO2_norecal": {
+      "mae": 314.85,
+      "r2": -1.924,
+      "pearson": -0.471
+     },
+     "CO2_recal": {
+      "mae": 169.95,
+      "r2": -2.841,
+      "pearson": -0.317,
+      "used_frac": 0.344
+     }
+    }
+   }
+  },
+  "test_3seed_pred_ensemble": {
+   "CO2_recal": {
+    "mae": 84.7,
+    "r2": 0.058,
+    "pearson": 0.651,
+    "used_frac": 0.344
+   },
+   "CO2_norecal": {
+    "mae": 315.01,
+    "r2": -1.883,
+    "pearson": -0.377
+   },
+   "RH": {
+    "mae": 4.9,
+    "r2": -0.548,
+    "pearson": -0.391
+   }
+  },
+  "champion_reference": {
+   "CO2_recal": {
+    "mae": [
+     47.7,
+     1.2
+    ],
+    "r2": 0.68
+   },
+   "norecal_shape_r": [
+    0.81,
+    0.03
+   ],
+   "spec": "LSTM(64) on identical grid + same recal protocol (idea-0 baseline)"
+  },
+  "verdict": "LOSS. PatchTST recal MAE 103.9\u00b146.8 (R2 -0.67\u00b11.54, r 0.36\u00b10.48) vs champion 47.7\u00b11.2 (R2 0.68); ensemble rescue only reaches 84.7. No-recal shape r -0.38 (ens) vs 0.81\u00b10.03. Attention does not beat recurrence here."
+ }
+}

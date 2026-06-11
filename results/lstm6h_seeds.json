@@ -1,0 +1,31 @@
+{
+ "seeds": [
+  0,
+  1,
+  2,
+  3,
+  4
+ ],
+ "shape_r": [
+  0.764,
+  0.795,
+  0.83,
+  0.83,
+  0.851
+ ],
+ "offset_mae": [
+  49.9,
+  47.2,
+  47.1,
+  47.5,
+  46.7
+ ],
+ "offset_r2": [
+  0.604,
+  0.679,
+  0.684,
+  0.676,
+  0.687
+ ],
+ "reproduce": "run_ladder4.py config W=360 MA=60s h=64 ep=40; seeds 0-4; offset per run_ladder2.r2; independently re-derived by PROVENANCE_B agent"
+}

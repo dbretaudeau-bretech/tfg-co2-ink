@@ -1,0 +1,56 @@
+{
+  "b1_ridge_devreal": {
+    "CO2": {
+      "mae": 325.54,
+      "r2": -2.268,
+      "pearson": 0.793
+    },
+    "alpha": 1000.0
+  },
+  "b2_ridge_devreal_hp2h": {
+    "CO2": {
+      "mae": 400.06,
+      "r2": -3.024,
+      "pearson": 0.515
+    },
+    "alpha": 1000.0
+  },
+  "b3_histgb_devreal": {
+    "CO2": {
+      "mae": 293.09,
+      "r2": -1.136,
+      "pearson": 0.032
+    }
+  },
+  "c1": {
+    "error": "failed"
+  },
+  "c2": {
+    "error": "failed"
+  },
+  "b4_ridge_rh_devreal": {
+    "RH": {
+      "mae": 1.61,
+      "r2": 0.9,
+      "pearson": 0.996
+    },
+    "alpha": 100.0
+  },
+  "r1_ridge72_segrecal": {
+    "CO2": {
+      "mae": 122.03,
+      "r2": -0.837,
+      "pearson": 0.845
+    },
+    "alpha": 1000.0,
+    "note": "per-lamp-segment offset recal (30min), cal samples excluded"
+  },
+  "r2_BR_RH_linear_segrecal": {
+    "CO2": {
+      "mae": 53.65,
+      "r2": 0.645,
+      "pearson": 0.822
+    },
+    "note": "B/R+RH linear, per-segment offset recal (30min)"
+  }
+}
