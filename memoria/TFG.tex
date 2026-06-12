@@ -37,7 +37,7 @@
 \rfoot{Barcelona, June 2026}
 
 \title{Machine-learning readout of a colorimetric CO$_2$-sensing ink}
-\author{Author: Daniel Bretaudeau Merce, [email]@alumnes.ub.edu}  % TODO email
+\author{Author: Daniel Bretaudeau Merce, dbretame17@alumnes.ub.edu}
 \affiliation{Facultat de F\'{\i}sica, Universitat de Barcelona, Diagonal
 645, 08028 Barcelona, Spain.}
 \author{Advisor: Ismael Benito Altamirano, ismael.benito@ub.edu}
@@ -369,22 +369,22 @@ interferent.
 The same recipes collapse on CO$_2$: every plain learner ends below the
 197-ppm floor, killed by the slow baseline drift of the ageing film.
 The failures are systematic and each teaches something
-(Table~\ref{tab:ladder}). Least squares on the 16 raw channels
-memorises the training period (train 87, test 1549 ppm); engineered ratios
-repair it partly (403 ppm), and causal high-pass features help CO$_2$ best
-at 4 h (297 ppm) while RH prefers 8 h: the CO$_2$ signal rides a baseline
-whose drift overlaps the protocol cycles. A capacity triplet of
-unregularised MLPs (4.8k/85k/2.2M parameters; single runs) shows the
-expected overfitting pattern, train error falling
-(25\,$\to$\,12\,$\to$\,10 ppm) while test error rises
-(671\,$\to$\,900\,$\to$\,1030 ppm); regularising properly does not save
-it (a val-selected 128$\times$64 net with dropout, weight decay and early
-stopping: $521\pm67$ ppm, $r=0.70$). Sequence models do best: an LSTM reading six hours of 60-s-averaged
-context becomes the ladder's best shape-tracker ($r=0.81\pm0.03$ over five
-seeds, Fig.~\ref{fig:predictions}b), yet still posts MAE $\approx$650
-ppm: no context length we could test (up to 8 h) supplies the absolute
-anchor. No family, linear to recurrent, infers the drift from the
-visible channels; added capacity only memorises it.
+(Table~\ref{tab:ladder}). Least squares on the 16 raw channels simply
+memorises the training period: 87 ppm on train, 1549 on test. Engineered
+ratios repair part of that (403 ppm) and causal high-pass features a bit
+more (297 ppm at a 4-h window), but the CO$_2$ signal rides a baseline
+whose drift overlaps the protocol cycles, so no static feature set
+removes it. More capacity makes things worse: growing an unregularised
+MLP from 4.8k to 2.2M parameters drives training error down while test
+error climbs from 671 to 1030 ppm, and proper regularisation does not
+rescue it ($521\pm67$ ppm, $r=0.70$, three seeds). Sequence models come
+closest: an LSTM reading six hours of 60-s-averaged context tracks the
+shape of the oscillations better than anything else ($r=0.81\pm0.03$
+over five seeds, Fig.~\ref{fig:predictions}b) yet still posts MAE
+$\approx$650 ppm, because no context length we could test (up to 8 h)
+supplies the absolute anchor. The pattern repeats in every family,
+linear to recurrent: none infers the drift from the visible channels;
+added capacity only memorises it.
 
 \subsection{CO$_2$ with an infrared reference}
 
@@ -394,9 +394,10 @@ emitter/detector ageing: train$\to$test, B/IR shifts only 0.26
 train-$\sigma$ vs 1.09 for B/R and 0.69 for raw B. A ridge on
 the twelve (R,G,B)/IR ratios reaches {\bf MAE 103 ppm, $R^2=0.77$,
 $r=0.90$ with no correction at all}, the only model that beats the
-constant floor unaided; its test error is \emph{lower} than its
-training error (103 vs 179 ppm, partly because the test range is
-narrower), so it is not exploiting training-period quirks. The reference
+constant floor unaided; its test error is even \emph{lower} than its
+training error (103 vs 179 ppm) because the test block spans a narrower
+range: relative to each block's spread both errors are
+$\approx$0.4$\sigma$, so it is not exploiting training-period quirks. The reference
 cancels drift common to the channels but not lamp steps (IR barely follows
 the duty cycle), which is what the remaining error is made of. The fitted weights load mainly on the red-channel ratios with opposing
 signs across pixels, consistent with between-pixel common-mode rejection
