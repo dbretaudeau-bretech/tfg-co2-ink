@@ -389,20 +389,22 @@ added capacity only memorises it.
 \subsection{CO$_2$ with an infrared reference}
 
 The way out is not a bigger model but a better ratio. The dye barely
-modulates the \emph{infrared} channel, while B and IR share a slow common drift, consistent with
-emitter/detector ageing: train$\to$test, B/IR shifts only 0.26
-train-$\sigma$ vs 1.09 for B/R and 0.69 for raw B. A ridge on
-the twelve (R,G,B)/IR ratios reaches {\bf MAE 103 ppm, $R^2=0.77$,
-$r=0.90$ with no correction at all}, the only model that beats the
-constant floor unaided; its test error is even \emph{lower} than its
-training error (103 vs 179 ppm) because the test block spans a narrower
-range: relative to each block's spread both errors are
-$\approx$0.4$\sigma$, so it is not exploiting training-period quirks. The reference
-cancels drift common to the channels but not lamp steps (IR barely follows
-the duty cycle), which is what the remaining error is made of. The fitted weights load mainly on the red-channel ratios with opposing
-signs across pixels, consistent with between-pixel common-mode rejection
-(collinear coefficients are not individually meaningful); tiny
-MLPs only lose, consistent with an essentially linear relation.
+touches the \emph{infrared} channel, so IR shares the slow ageing of
+emitter, detector and film with the colour channels while staying blind
+to the gas, and the division cancels what they share: from train to test, B/IR shifts by only 0.26
+train-$\sigma$, against 1.09 for B/R and 0.69 for raw B. A ridge on the
+twelve (R,G,B)/IR ratios reaches {\bf MAE 103 ppm, $R^2=0.77$, $r=0.90$
+with no correction at all}, the only model that beats the constant
+floor unaided. Its test error is even \emph{lower} than its training
+error (103 vs 179 ppm); no miracle, the test block just spans a
+narrower range, and relative to each block's spread both errors are the
+same $\approx$0.4$\sigma$. What the ratio does not cancel are the lamp
+steps (IR barely follows the duty cycle), and the remaining error is
+made of exactly that. The fitted weights mostly sit on the red-channel
+ratios with opposing signs across pixels, which points to between-pixel
+common-mode rejection (collinear coefficients are not individually
+meaningful), and tiny MLPs only lose: the relation is essentially
+linear.
 
 \subsection{CO$_2$ with one offset per illumination change}
 
