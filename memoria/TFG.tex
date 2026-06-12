@@ -86,36 +86,38 @@ HCO_3^-},
 \label{eq:chem}
 \end{equation}
 shifting the equilibrium of a pH-indicator dye between its basic and
-protonated forms. The two forms absorb in different
-spectral bands, so the \emph{hue} of the reflected light (the balance
-between blue and red) tracks the protonated fraction; the modulations are small ($\Delta$B/R $<1\,\%$ over the
-full range), so the reflectance--absorbance relation linearises whatever
-the regime, and B/R is to first order linear in that fraction. Two consequences follow. First, the
-natural observable is a channel \emph{ratio}: each channel measures
-illumination times film reflectance, $C_i = I_i\rho_i$, so a lamp change
-that rescales every $I_i$ by a common factor cancels identically (in the
-ideal case) in
+protonated forms. The two forms absorb in different spectral bands, so
+the \emph{hue} of the reflected light, the balance between blue and
+red, tracks the protonated fraction. The modulations are small,
+$\Delta$B/R $<1\,\%$ over the full range, which keeps the
+reflectance--absorbance relation linear whatever the regime; B/R is
+then, to first order, linear in that fraction. Two consequences
+follow. First, the natural observable is a channel \emph{ratio}. Each
+channel measures illumination times film reflectance, $C_i =
+I_i\rho_i$, so a lamp change that rescales every $I_i$ by a common
+factor cancels identically (in the ideal case) in
 $\mathrm{B/R}=\rho_{\rm B}/\rho_{\rm R}$, while any single channel is
-dominated by illumination; B and R are a natural pair because, for the
-indicator dyes used in CO$_2$-sensing films \cite{mills92}, the two forms
-absorb at opposite ends of the visible, so $\rho_{\rm B}$ and
-$\rho_{\rm R}$ shift in opposite directions. The cancellation is only as
+dominated by illumination. B and R make a natural pair: for the
+indicator dyes used in CO$_2$-sensing films \cite{mills92} the two
+forms absorb at opposite ends of the visible, so $\rho_{\rm B}$ and
+$\rho_{\rm R}$ move in opposite directions. The cancellation is only as
 exact as the LED's spectral stability under duty changes; Sec.~III
-quantifies how well it holds in practice. Second, the protonated fraction obeys the
-Henderson--Hasselbalch relation: the protonated-to-basic ratio is
-proportional to $[\mathrm{H^+}]$, itself proportional to the CO$_2$
-concentration in a base-buffered film \cite{mills92}, so the response is
-smooth, monotonic and close to linear while that ratio remains small.
-Equation~(\ref{eq:chem}) also exposes the first intrinsic weakness: water
-activity enters the equilibrium directly, and the film's water content
-additionally sets its swelling and the indicator's effective p$K_a$, so
-humidity must interfere \cite{gonzalez25}. The second weakness is kinetic rather than
-thermodynamic: reaching the equilibrium of Eq.~(\ref{eq:chem}) requires gas
-dissolution and diffusion through the film (the CO$_2$ hydration step
-itself adds only seconds), so the ink is \emph{slow}: effective time
-constants of minutes to tens of minutes, dominated by transport.
+measures how well it holds. Second, the protonated fraction obeys the
+Henderson--Hasselbalch relation. The protonated-to-basic ratio is
+proportional to $[\mathrm{H^+}]$, which in a base-buffered film is
+proportional to the CO$_2$ concentration \cite{mills92}, so the
+response is smooth, monotonic and close to linear while that ratio
+stays small. Equation~(\ref{eq:chem}) also exposes the two intrinsic
+weaknesses. Water activity enters the equilibrium directly, and the
+film's water content also sets its swelling and the indicator's
+effective p$K_a$: humidity must interfere \cite{gonzalez25}. The
+second weakness is kinetic. Reaching the equilibrium of
+Eq.~(\ref{eq:chem}) takes gas dissolution and diffusion through the
+film (the hydration step itself adds only seconds), so the ink is
+\emph{slow}, with effective time constants of minutes to tens of
+minutes, dominated by transport.
 
-This slowness dictated the experimental design: long quasi-static
+This slowness set the experimental design: long quasi-static
 CO$_2$ triangles ($\sim$11 h per cycle) the film can track; an RH
 staircase held for hours so cross-talk maps separately; LED-duty steps to
 expose what the ratios fail to cancel; and a deliberately fast final
@@ -172,16 +174,17 @@ simultaneously. All streams were resampled onto a common 5-s grid
 \subsection{Data validation}
 \label{sec:validation}
 
-Every logged channel was first cross-correlated against the two
-references, and this proved essential: the acquisition log names
-the gas channels in an order inconsistent with the recorded data (the
-channel labelled humidity dosing tracks the NDIR CO$_2$ reference at
-$r=0.97$; the one labelled CO$_2$ is the dry-air dilution line). Even the correct setpoint channel overstates the chamber (the SCD30
-reaches $\sim$75\,\% of nominal, $\sim$64\,\% when the humid line runs
-high): the nominal ignores part of the dilution. All results below are therefore calibrated
-against the \emph{measured} references (SCD30 for CO$_2$, BME280 for RH),
-and the true CO$_2$ range is the 100--1700 ppm of
-Fig.~\ref{fig:protocol}.
+Before fitting anything, we cross-correlated every logged channel
+against the two references. This proved essential. The acquisition log
+names the gas channels in an order inconsistent with the recorded data:
+the channel labelled humidity dosing tracks the NDIR CO$_2$ reference
+at $r=0.97$, while the one labelled CO$_2$ is the dry-air dilution
+line. And even the correct setpoint channel overstates the chamber,
+since the nominal value ignores part of the dilution (the SCD30 reaches
+$\sim$75\,\% of nominal, $\sim$64\,\% when the humid line runs high).
+All results below are therefore calibrated against the \emph{measured}
+references, SCD30 for CO$_2$ and BME280 for RH, and the true CO$_2$
+range is the 100--1700 ppm of Fig.~\ref{fig:protocol}.
 
 \subsection{Learning task and splits}
 \label{sec:task}
@@ -195,23 +198,25 @@ and a control adding the lamp duty as an input changes ridge-72 by
 $\sim$3\,\% while degrading the IR-referenced features. Only the \emph{timing} of lamp changes is used, to
 schedule that offset.
 
-The split is \emph{chronological}: 70/15/15 train/validation/test with
-4-min guard gaps (Fig.~\ref{fig:protocol}); this choice matters more than
-any model choice.
-Adjacent 5-s samples are nearly identical (the chamber and the film evolve
-over minutes), so a \emph{random} split places near-twins of test points in
-the training set and leakage masquerades as skill. Every result below is
-chronological. The price is honesty about distribution shift, and here the
-chronological split is also a \emph{regime} split: the protocol operates
-in three modes, slow CO$_2$ triangles with an RH staircase (train), nearly
-constant CO$_2$ under lamp/RH excursions (validation), and fast
-simultaneous modulation with a quieter tail (test). Generalisation
-therefore means transferring across operating modes as well as across
-time: the test block modulates CO$_2$ on 15-min steps, faster than the
-film's response (Sec.~III), its range narrows to 283--1609 ppm, and the film has aged for days. It also means validation can rank RH models but
-barely CO$_2$ ones, whose variance it lacks. This mirrors a key deployment difficulty: regime shift without
-retraining. As floors, predicting the training mean gives test
-MAE 3.88 \%RH and 197 ppm CO$_2$; a model must beat \emph{these} rather than zero.
+The split is \emph{chronological}, 70/15/15 train/validation/test with
+4-min guard gaps (Fig.~\ref{fig:protocol}), and this choice matters
+more than any model choice. Adjacent 5-s samples are nearly identical,
+since the chamber and the film evolve over minutes, so a \emph{random}
+split would put near-twins of the test points inside the training set
+and leakage would look like skill. Every result below is
+chronological. The price is facing real distribution shift, because
+here the chronological split is also a \emph{regime} split. The
+protocol operates in three modes: slow CO$_2$ triangles with an RH
+staircase (train), nearly constant CO$_2$ under lamp and RH changes
+(validation), and fast simultaneous modulation with a quieter tail
+(test). Generalising therefore means transferring across operating
+modes as well as across time. The test block moves CO$_2$ in 15-min
+steps, faster than the film can follow (Sec.~III), its range narrows to
+283--1609 ppm, and the film has aged for days. Validation, with almost
+no CO$_2$ variance, can rank RH models but barely CO$_2$ ones. This
+mirrors a key deployment difficulty: regime shift without retraining.
+As floors, predicting the training mean gives test MAE 3.88 \%RH and
+197 ppm CO$_2$; a model has to beat \emph{these}, not zero.
 
 \section{Colorimetric characterisation}
 
@@ -256,7 +261,7 @@ $10^3$ ppm of apparent CO$_2$ per \%RH, although the staircase protocol,
 which holds RH nearly constant inside lamp-stable segments, leaves $\beta$
 only loosely identified (its per-segment value varies in magnitude and even
 sign); pinning it down needs a protocol that sweeps RH and CO$_2$ jointly.
-Any quantitative use of the ink thus requires simultaneous knowledge of RH,
+Any quantitative use of the ink therefore needs to know RH at the same time,
 which, as shown next, the ink itself provides.
 
 \begin{table}[b!]
@@ -282,7 +287,7 @@ Lamp (\%) & $t$ (h) & CO$_2$ (ppm) & $\alpha$ ($10^{-6}$/ppm) & $r_p$ \\
 \end{tabular}
 \end{table}
 
-The dynamics are not instantaneous: cross-correlating RH-corrected B/R
+The response is not immediate: cross-correlating RH-corrected B/R
 with the NDIR gives a $\sim$3-min apparent lag in slow sweeps but up to
 $\sim$44 min in the fast block. The film acts as a low-pass filter whose apparent lag grows with
 excitation speed; fluctuations faster than it are attenuated, not
@@ -296,7 +301,7 @@ Table~\ref{tab:ladder} reports every model on identical inputs,
 splits and metrics, with train next to test error so the
 \emph{generalisation gap} is visible per family;
 Fig.~\ref{fig:allmodels} (appendix) shows every fit over the full run.
-Instantaneous-model hyperparameters were tuned on validation only; it
+Hyperparameters of the snapshot models (one 5-s sample in, no history) were tuned on validation only; it
 carries almost no CO$_2$ variance (Sec.~II.C), so the LSTM configuration
 is a representative architecture.
 
@@ -354,15 +359,16 @@ itself.}
 \end{figure}
 
 
-Against the 3.88 \%RH floor, an RH-tuned ridge (8-h high-pass window,
-selected per target on validation) reaches {\bf MAE 0.35 \%RH,
-$R^2=0.993$} on the test block (Fig.~\ref{fig:predictions}a). Physically
-expected: water activity enters Eq.~(\ref{eq:chem}) directly.
-An ablation pins the mechanism: red alone fails below the floor
-(4.4 \%RH; one band is absorbance times illumination), one pixel's four
-colours recover 0.60 \%RH, and sixteen raw channels do \emph{worse} than
-four (1.04). The RH signal is spectral, and the ink itself measures its dominant
-interferent.
+Humidity turns out to be the easy half. Against the 3.88 \%RH floor, a
+ridge tuned for RH (8-h high-pass window, selected on validation)
+reaches {\bf MAE 0.35 \%RH, $R^2=0.993$} on the test block
+(Fig.~\ref{fig:predictions}a). This is physically expected, since water
+activity enters Eq.~(\ref{eq:chem}) directly. An ablation shows where
+the signal lives: the red channel alone fails below the floor (4.4
+\%RH, one band only measures absorbance times illumination), the four
+colours of a single pixel already recover 0.60 \%RH, and the sixteen
+raw channels together do \emph{worse} than four (1.04). The information
+is spectral, and the ink itself measures its own dominant interferent.
 
 \subsection{CO$_2$ by direct regression}
 
@@ -408,22 +414,23 @@ linear.
 
 \subsection{CO$_2$ with one offset per illumination change}
 
-After an illumination change no ink signal supplies the absolute
-anchor; the standard remedy is one offset, measured against a reference in
-the first 30 min of each lamp segment (samples excluded; evaluated
-windows = 34\,\% of test, 283--623 ppm). The relevant baseline is strict: holding the calibration value
-already gives 54 ppm ($R^2=0.57$); the corrected ridge (122) and MLP
-(79, one seed) fall short, and the three-parameter
-Eq.~(\ref{eq:linmodel}) ties it with better tracking ($R^2=0.65$), with
-measured or ink-derived RH alike.
-The IR-referenced ridge beats the bar: {\bf 50 ppm, $R^2=0.71$,
-$r=0.91$} (Fig.~\ref{fig:predictions}c), twelve features,
-selected by validation (Fig.~\ref{fig:summary}). The six-hour LSTM matches it numerically ($47.7\pm1.2$ ppm over five
-seeds) but only while training matches the test regime; in the single
-refit run of Sec.~IV.F it collapses, and it is reported as an \emph{experiment} on temporal
-context. Without the offset, Eq.~(\ref{eq:linmodel})
-fails like everything else (171 ppm): the residual drift could only be
-removed by measuring it.
+After an illumination change, nothing in the ink signal says where the
+absolute level sits; the standard remedy is one offset, measured
+against a reference during the first 30 min of each lamp segment (those
+samples are excluded, leaving 34\,\% of the test block for evaluation,
+283--623 ppm). The bar this sets is strict: just holding the
+calibration value already gives 54 ppm ($R^2=0.57$). The corrected
+ridge (122 ppm) and MLP (79, one seed) fall short, and the
+three-parameter Eq.~(\ref{eq:linmodel}) ties it while tracking better
+($R^2=0.65$), with measured or ink-derived RH alike. The IR-referenced
+ridge is the one that beats it: {\bf 50 ppm, $R^2=0.71$, $r=0.91$}
+(Fig.~\ref{fig:predictions}c), twelve features, selected by validation
+(Fig.~\ref{fig:summary}). The six-hour LSTM matches it numerically
+($47.7\pm1.2$ ppm over five seeds), but only while training matches the
+test regime; in the single refit run of Sec.~IV.F it collapses, so we
+report it as an \emph{experiment} on temporal context. Without the
+offset, Eq.~(\ref{eq:linmodel}) fails like everything else (171 ppm):
+the residual drift can only be removed by measuring it.
 
 Three caveats bound these numbers. The offsets are computed against the
 co-located NDIR reference, so a deployment needs a reference channel or a
@@ -445,16 +452,18 @@ level is above a threshold.
 
 \subsection{Adding the validation block to training}
 
-Refitting on train+validation after selection (injecting lamp/RH
-variation at constant CO$_2$) improves every instantaneous model
-markedly (ridge+HP 297$\to$137 ppm, MLP 521$\to$155, IR ridge
-103$\to$86 without correction and 50$\to$45 ppm with offset, in this single
-configuration),
-while the recurrent model collapses in our single refit run
-($r$ 0.81$\pm$0.03 $\to$ 0.05, one seed), consistent with the added
-block teaching a wrong temporal regime. This suggests the binding constraint is the data itself: one film,
-one run, five similar sweeps, one confounder block.
+As a last experiment we refit on train plus validation, every choice
+kept fixed, adding lamp and RH variation at constant CO$_2$ to the
+training data. Every snapshot model clearly improves:
+ridge+HP 297$\to$137 ppm, MLP 521$\to$155, the IR ridge 103$\to$86
+without correction and 50$\to$45 ppm with the offset (one
+configuration). The recurrent model instead collapses in our single
+refit run ($r$ 0.81$\pm$0.03 $\to$ 0.05, one seed): the added block
+apparently teaches it a wrong temporal regime. The binding constraint,
+then, is the data itself: one film, one run, five similar sweeps, one
+confounder block.
 
+\newpage
 \section{Conclusions}
 \begin{itemize}
 \item The ink is a genuine CO$_2$ sensor: in lamp-stable conditions
@@ -691,7 +700,7 @@ ridge-72 403$\to$250 ($R^2$ still $<0$); ridge+HP 297$\to$137
 ($R^2=0.80$, $r=0.92$) and, with the offset, 50$\to$45 ppm
 ($R^2=0.76$); B/R+RH+offset 54$\to$53; LSTM 6-h shape $r$ 0.81$\to$0.05
 and 48$\to$93 ppm with offset. The validation block teaches confounder
-robustness to instantaneous models and a wrong temporal regime to
+robustness to snapshot models and a wrong temporal regime to
 recurrent ones.
 
 {\bf Reproducibility.} The full pipeline (feature construction, every
