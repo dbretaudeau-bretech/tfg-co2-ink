@@ -51,12 +51,11 @@ we show the blue-to-red ratio B/R responds linearly to CO$_2$
 (sensitivity $\approx-5\times10^{-6}$ per ppm), with order-$10^3$ ppm
 per \%RH humidity cross-sensitivity (loosely constrained) and a lag up to
 tens of minutes. Humidity is recovered from the
-ink alone (MAE 0.35\,\%, $R^2=0.993$). For absolute CO$_2$, referencing each colour channel to the
-co-measured infrared cancels most channel-common drift: a 12-feature
-linear model reaches MAE 103 ppm ($R^2=0.77$) uncorrected and, with one
-offset per illumination change, 50 ppm against a 54-ppm
-hold-the-calibration baseline ($R^2$ 0.71 vs 0.57) on the lamp-stable
-34\,\% of test.
+ink alone (MAE 0.35\,\%, $R^2=0.993$). For absolute CO$_2$, dividing each colour channel by the co-measured
+infrared removes most of the slow drift the channels share: a 12-feature
+linear model reaches MAE 103 ppm ($R^2=0.77$) with no correction, and
+50 ppm with one offset per lamp change, beating a hold-the-last-value
+baseline (54 ppm, $R^2$ 0.71 vs 0.57) on the steady-lamp 34\,\% of test.
 
 \keyword{colorimetric sensing, CO$_2$ sensor, optical reflectance, machine learning, regression, sensor drift}
 \sdg{3, 9, 11, 13 (see page 6)}
@@ -174,17 +173,17 @@ simultaneously. All streams were resampled onto a common 5-s grid
 \subsection{Data validation}
 \label{sec:validation}
 
-Before fitting anything, we cross-correlated every logged channel
-against the two references. This proved essential. The acquisition log
-names the gas channels in an order inconsistent with the recorded data:
-the channel labelled humidity dosing tracks the NDIR CO$_2$ reference
-at $r=0.97$, while the one labelled CO$_2$ is the dry-air dilution
-line. And even the correct setpoint channel overstates the chamber,
-since the nominal value ignores part of the dilution (the SCD30 reaches
-$\sim$75\,\% of nominal, $\sim$64\,\% when the humid line runs high).
-All results below are therefore calibrated against the \emph{measured}
-references, SCD30 for CO$_2$ and BME280 for RH, and the true CO$_2$
-range is the 100--1700 ppm of Fig.~\ref{fig:protocol}.
+Before fitting anything, we identified each logged channel by
+cross-correlating it with the two references rather than by its column
+name, and this proved essential. The channel logged as humidity dosing
+is the one that follows the NDIR CO$_2$ reference ($r=0.97$), so we
+assign every channel by its measured behaviour. The nominal setpoint
+also sits somewhat above the chamber reading (the SCD30 reaches
+$\sim$75\,\% of nominal, $\sim$64\,\% when the humid line runs high), as
+expected when part of the flow is dilution air. All results below are
+therefore calibrated against the \emph{measured} references, SCD30 for
+CO$_2$ and BME280 for RH, and the true CO$_2$ range is the $\sim$100--1700 ppm
+of Fig.~\ref{fig:protocol}.
 
 \subsection{Learning task and splits}
 \label{sec:task}
@@ -402,9 +401,9 @@ train-$\sigma$, against 1.09 for B/R and 0.69 for raw B. A ridge on the
 twelve (R,G,B)/IR ratios reaches {\bf MAE 103 ppm, $R^2=0.77$, $r=0.90$
 with no correction at all}, the only model that beats the constant
 floor unaided. Its test error is even \emph{lower} than its training
-error (103 vs 179 ppm); no miracle, the test block just spans a
-narrower range, and relative to each block's spread both errors are the
-same $\approx$0.4$\sigma$. What the ratio does not cancel are the lamp
+error (103 vs 179 ppm), because the test block spans a narrower range;
+relative to each block's spread both errors are the same
+$\approx$0.4$\sigma$. What the ratio does not cancel are the lamp
 steps (IR barely follows the duty cycle), and the remaining error is
 made of exactly that. The fitted weights mostly sit on the red-channel
 ratios with opposing signs across pixels, which points to between-pixel
@@ -480,8 +479,7 @@ itself on this film (MAE 0.35 \%RH, $R^2=0.993$).
 model capacity; most of that drift is channel-common and cancelled by the
 infrared reference: a 12-feature (R,G,B)/IR linear model reaches 103 ppm
 ($R^2=0.77$) without correction and 50 ppm with one 30-min offset per
-illumination change (45 in a single refit on all pre-test data); all
-results are one-film, reference-anchored.
+illumination change; all results are one-film, reference-anchored.
 
 \item A central limitation is the \emph{speed} of the CO$_2$ changes:
 the apparent lag grows from $\sim$3 to $\sim$44 min under fast
@@ -492,8 +490,8 @@ an orthogonal RH$\times$CO$_2$ sweep, a multi-film repeat. In threshold mode the
 (AUC 0.98 at 800 ppm with no correction): the ventilation-indicator regime.
 
 \item Methodologically, validating every channel against independent
-references proved decisive: it exposed a channel-labelling inconsistency
-and redefined the calibration targets.
+references before fitting proved decisive: it set the calibration
+targets the rest of the work relies on.
 \end{itemize}
 
 \begin{acknowledgments}
